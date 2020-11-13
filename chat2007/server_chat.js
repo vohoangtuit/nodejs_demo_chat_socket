@@ -23,19 +23,22 @@ app.use(express.static(__dirname + '/public'));
 var numUsers = 0;
  
 io.on('connection', function (socket) {
+	console.log('connection ');
   var addedUser = false;
  
   // when the client emits 'new message', this listens and executes
-  socket.on('new message', function (data) {
+  socket.on('new_message', function (data) {
     // we tell the client to execute 'new message'
-    socket.broadcast.emit('new message', {
+	console.log('new_message ' + data);
+    socket.broadcast.emit('new_message', {
       username: socket.username,
       message: data
     });
   });
  
   // when the client emits 'add user', this listens and executes
-  socket.on('add user', function (username) {
+  socket.on('add_user', function (username) {
+	  console.log('add_user ..' + username.username);
     if (addedUser) return;
  
     // we store the username in the socket session for this client
@@ -46,7 +49,7 @@ io.on('connection', function (socket) {
       numUsers: numUsers
     });
     // echo globally (all clients) that a person has connected
-    socket.broadcast.emit('user joined', {
+    socket.broadcast.emit('user_joined', {
       username: socket.username,
       numUsers: numUsers
     });
@@ -60,7 +63,7 @@ io.on('connection', function (socket) {
   });
  
   // when the client emits 'stop typing', we broadcast it to others
-  socket.on('stop typing', function () {
+  socket.on('stop_typing', function () {
     socket.broadcast.emit('stop typing', {
       username: socket.username
     });
@@ -70,9 +73,9 @@ io.on('connection', function (socket) {
   socket.on('disconnect', function () {
     if (addedUser) {
       --numUsers;
- 
+    console.log('user_left ..' + socket.username.username);
       // echo globally that this client has left
-      socket.broadcast.emit('user left', {
+      socket.broadcast.emit('user_left', {
         username: socket.username,
         numUsers: numUsers
       });
